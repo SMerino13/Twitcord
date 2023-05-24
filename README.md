@@ -6,3 +6,4 @@ Built using HTML, CSS, JS, Python, SQLite
 
 ### Disclaimer
 Twitcord was originally conceptualized by [Annie Wu](https://github.com/anniedotexe/twitcord)
+This is a modified version that adds backend functionality, working social features, authentication, and more. 
