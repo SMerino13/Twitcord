@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+  <head>
+    <title>Twitcord</title>
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="author" content="Annie Wu" />
+    <meta name="contributer" content="Steven M" />
+    <meta
+      name="description"
+      content="Twitter clone, but if Twitter was owned by Discord"
+    />
+
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="{% static 'css/message.css' %}"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <link
+      href="https://unpkg.com/css.gg@2.0.0/icons/css/add.css"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body>
+    <div class="page">
+      <div class="user-info">
+        <div class="prof-pic">
+          {% if user.avatar %}
+          <img src="{{user.avatar.url}}" alt="Profile Picture" />
+          {%else %}
+          <img
+            src="{% static 'img/discord-icon-with-status-bordered.svg' %}"
+            alt="Profile Picture"
+          />
+          {% endif %}
+        </div>
+        <p class="username">{{user.user.username}}</p>
+      </div>
+
+      <div class="msg-wrapper">
+        {% for msg in messages %} {% if user.user_id == msg.sender_id %}
+        <div class="chat-message">
+          <div class="prof-pic">
+            {% if user.avatar %}
+            <img src="{{user.avatar.url}}" alt="Profile Picture" />
+            {% else %}
+            <img
+              src="{% static 'img/discord-icon-with-status-bordered.svg' %}"
+              alt="Profile Picture"
+            />
+            {% endif %}
+          </div>
+          <div class="message-content">
+            <div class="message-header">
+              <p>{{user.user.username}}</p>
+              <span>{{msg.timestamp}}</span>
+            </div>
+            <p class="content">{{msg.content}}</p>
+          </div>
+        </div>
+
+        {% else %}
+        <div class="chat-message">
+          <div class="prof-pic">
+            {% if current_user.avatar %}
+            <img src="{{ current_user.avatar.url }}" alt="Profile Picture" />
+            {% else %}
+            <img
+              src="{% static 'img/discord-icon-with-status-bordered.svg' %}"
+              alt="Profile Picture"
+            />
+            {% endif %}
+          </div>
+          <div class="message-content">
+            <div class="message-header">
+              <p>{{current_user.user.username}}</p>
+              <span>{{msg.timestamp}}</span>
+            </div>
+            <p class="content">{{msg.content}}</p>
+          </div>
+        </div>
+        {% endif %} {% endfor %}
+      </div>
+
+      <div class="message-input">
+        <form action="" method="POST" enctype="multipart/form-data">
+          {% csrf_token %}
+          <div class="upload-button">
+            <input type="file" id="file-input" name="msg_img" />
+            <label for="file-input">
+              <i class="gg-add"></i>
+            </label>
+          </div>
+          <textarea name="msg" placeholder="@{{user.user.username}}"></textarea>
+          <button>Send</button>
+        </form>
+      </div>
+
+      <footer class="nav-bar-bottom">
+        <a href="{% url 'profile' request.user.id %}">
+          <img src="{% static '/img/discord-logo.svg' %}" alt="Server" />
+        </a>
+        <a href="{% url 'friends' %}">
+          <img src="{% static '/img/discord-friends.svg' %}" alt="Friends" />
+        </a>
+        <a href="{% url 'search' %}">
+          <img src="{% static '/img/discord-search.svg' %}" alt="Search" />
+        </a>
+        <a href="{% url 'mentions' request.user.id %}">
+          <img src="{% static '/img/discord-mentions.svg' %}" alt="Mentions" />
+        </a>
+        <a href="{% url 'home' request.user.id %}">
+          {% if current_user.avatar %}
+          <img src="{{current_user.avatar.url}}" alt="Profile Picture" />
+          {% else %}
+          <img
+            src="{% static '/img/discord-icon-with-status.svg' %}"
+            alt="Profile Picture"
+          />
+          {% endif %}
+        </a>
+      </footer>
+    </div>
+
+    <script src="./js/main.js"></script>
+  </body>
+</html>

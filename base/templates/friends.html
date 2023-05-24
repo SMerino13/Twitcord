@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+  <head>
+    <title>Twitcord</title>
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="author" content="Annie Wu" />
+    <meta name="contributer" content="Steven Merino" />
+    <meta
+      name="description"
+      content="Twitter clone, but if Twitter was owned by Discord"
+    />
+
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="{% static 'css/friends.css' %}"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <link
+      href="https://unpkg.com/css.gg@2.0.0/icons/css/add.css"
+      rel="stylesheet"
+    />
+    <script
+      src="https://kit.fontawesome.com/df80e4625e.js"
+      crossorigin="anonymous"
+    ></script>
+  </head>
+
+  <body>
+    <div class="page">
+      <div class="header-info">
+        <i class="fa-solid fa-user"></i>
+        <span class="spn">Friends</span>
+        <button>All</button>
+        <button>Pending</button>
+        <button>Blocked</button>
+        <!-- <button class="add">Add Friend</button> -->
+      </div>
+
+      <!-- <div class="search-container">
+				<input
+					type="text"
+					class="search"
+					id="search-input"
+					placeholder="Search..."
+				/>
+				<i class="fa-solid fa-magnifying-glass"></i>
+			</div> -->
+
+      <div class="friends-list">
+        {% for friend in f_list %}
+        <div class="friend">
+          <div class="prof-pic">
+            {% if friend.avatar %}
+            <img src="{{friend.avatar.url}}" alt="Profile Picture" />
+            {% else %}
+            <img
+              src="{% static '/img/discord-icon-with-status.svg' %}"
+              alt="Profile Picture"
+            />
+            {% endif %}
+          </div>
+          <div class="user-info">
+            <span class="username">{{friend.user.username}}</span> <br />
+            <span>Joined {{friend.user.date_joined | date:"F d Y"}}</span>
+          </div>
+          <div class="btns">
+            <button><a href="{% url 'dm' friend.user.id %}">Message</a></button>
+            <button>
+              <a href="{% url 'home' friend.user.id %}">Profile</a>
+            </button>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <footer class="nav-bar-bottom">
+        <a href="{% url 'profile' request.user.id %}">
+          <img src="{% static '/img/discord-logo.svg' %}" alt="Server" />
+        </a>
+        <a href="{% url 'friends' %}">
+          <img src="{% static '/img/discord-friends.svg' %}" alt="Friends" />
+        </a>
+        <a href="{% url 'search' %}">
+          <img src="{% static '/img/discord-search.svg' %}" alt="Search" />
+        </a>
+        <a href="{% url 'mentions' request.user.id %}">
+          <img src="{% static '/img/discord-mentions.svg' %}" alt="Mentions" />
+        </a>
+        <a href="{% url 'home' request.user.id %}">
+          {% if user.avatar %}
+          <img src="{{user.avatar.url}}" alt="Profile Picture" />
+          {% else %}
+          <img
+            src="{% static '/img/discord-icon-with-status.svg' %}"
+            alt="Profile Picture"
+          />
+          {% endif %}
+        </a>
+      </footer>
+    </div>
+
+    <script src="{% static 'js/friends.js' %}"></script>
+  </body>
+</html>

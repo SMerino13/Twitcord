@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+  <head>
+    <title>Twitcord</title>
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="author" content="Annie Wu" />
+    <meta name="contributer" content="Steven M" />
+    <meta
+      name="description"
+      content="Twitter clone, but if Twitter was owned by Discord"
+    />
+
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="{% static 'css/profile.css' %}"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    />
+  </head>
+
+  <body>
+    <div class="page">
+      <div class="profile-top-container">
+        <div class="header-photo">
+          {% if user.banner %}
+          <img src="{{user.banner.url}}" alt="Header" />
+          {% else %}
+          <img src="{% static 'img/header.jpg' %}" alt="Header" />
+          {% endif %}
+        </div>
+        <div class="profile">
+          <div class="prof-pic-and-buttons-row">
+            <div class="prof-pic">
+              {% if user.avatar %}
+              <img src="{{user.avatar.url}}" alt="Profile Picture" />
+              {% else %}
+              <img
+                src="{% static 'img/discord-icon-with-status-bordered.svg' %}"
+                alt="Profile Picture"
+              />
+              {% endif %}
+            </div>
+            <div class="buttons">
+              <div class="button message">
+                <a href="#">Delete Account</a>
+              </div>
+            </div>
+          </div>
+          <div class="username">
+            <span>{{user.user.username}}</span>
+            <img src="{% static 'img/verify.svg' %}" alt="Verified" />
+          </div>
+          <div class="hashtagNumber">#{{user.user.id}}</div>
+          <div class="badges">
+            <img
+              src="{% static 'img/discord-badges.svg' %}"
+              alt="Discord Badges"
+            />
+          </div>
+          <div class="bio">
+            <span>{{user.bio}}</span>
+          </div>
+          <div class="location-link-bday-joined">
+            <div class="location">
+              <img src="{% static 'img/location.svg' %}" alt="Location" />
+              <span>{{user.location}}</span>
+            </div>
+            <div class="link">
+              <img src="{% static 'img/link.svg' %}" alt="Link" />
+              <span
+                ><a href="https://{{user.links}}"
+                  >{{ user.links|slice:"4:" }}</a
+                ></span
+              >
+            </div>
+            <div class="date-joined">
+              <img src="{% static 'img/calendar.svg' %}" alt="Date Joined" />
+              <span>Joined {{user.user.date_joined | date:"F d Y"}}</span>
+            </div>
+          </div>
+          <div class="following-follower">
+            <div>
+              <span class="follow-number">{{user.num_of_following}}</span>
+              <span class="follow-text">Following</span>
+            </div>
+            <div>
+              <span class="follow-number">{{user.num_of_followers}}</span>
+              <span class="follow-text">Followers</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="container">
+        <form action="" method="POST" enctype="multipart/form-data">
+          {% csrf_token %}
+          <div class="input-row">
+            <label for="firstName">First Name:</label>
+            <input
+              type="text"
+              name="fname"
+              id="firstName"
+              value="{{user.user.first_name}}"
+            />
+          </div>
+          <div class="input-row">
+            <label for="lastName">Last Name:</label>
+            <input
+              type="text"
+              id="lastName"
+              name="lname"
+              value="{{user.user.last_name}}"
+            />
+          </div>
+          <div class="input-row">
+            <label for="link">Link:</label>
+            <input type="text" id="link" name="link" value="{{user.links}}" />
+          </div>
+          <div class="input-row">
+            <label for="profilePicture"
+              >Profile Picture:
+              <i class="far fa-file-image"></i>
+            </label>
+            <input type="file" name="pic" id="profilePicture" />
+          </div>
+          <div class="input-row">
+            <label for="banner"
+              >Banner:
+              <i class="far fa-file-image"></i>
+            </label>
+            <input
+              type="file"
+              id="banner"
+              name="banner"
+              placeholder="{{user.bio}}"
+            />
+          </div>
+          <!-- <div class="input-row">
+				<label for="birthday">Birthday:</label>
+				<input type="date" id="birthday" />
+				<button class="update-button">Update</button>
+				</div> -->
+          <div class="input-row">
+            <label for="location">Location:</label>
+            <input
+              type="text"
+              id="location"
+              name="location"
+              value="San Fransico, CA"
+            />
+          </div>
+          <div class="input-row">
+            <label for="username">Username:</label>
+            <input
+              type="text"
+              id="username"
+              name="username"
+              value="{{user.user.username}}"
+            />
+          </div>
+          <div class="input-row">
+            <label for="bio">Bio:</label>
+            <textarea id="bio" rows="4" name="bio" resize="none"></textarea>
+          </div>
+          <button class="update-button">Update</button>
+        </form>
+      </div>
+
+      <footer class="nav-bar-bottom">
+        <a href="{% url 'profile' request.user.id %}">
+          <img src="{% static '/img/discord-logo.svg' %}" alt="Server" />
+        </a>
+        <a href="{% url 'friends' %}">
+          <img src="{% static '/img/discord-friends.svg' %}" alt="Friends" />
+        </a>
+        <a href="{% url 'search' %}">
+          <img src="{% static '/img/discord-search.svg' %}" alt="Search" />
+        </a>
+        <a href="{% url 'mentions' request.user.id %}">
+          <img src="{% static '/img/discord-mentions.svg' %}" alt="Mentions" />
+        </a>
+        <a href="{% url 'home' request.user.id %}">
+          {% if user.avatar %}
+          <img src="{{user.avatar.url}}" alt="Profile Picture" />
+          {% else %}
+          <img
+            src="{% static '/img/discord-icon-with-status.svg' %}"
+            alt="Profile Picture"
+          />
+          {% endif %}
+        </a>
+      </footer>
+    </div>
+
+    <script src="./js/main.js"></script>
+  </body>
+</html>

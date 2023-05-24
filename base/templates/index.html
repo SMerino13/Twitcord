@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+  <head>
+    <title>Twitcord</title>
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="author" content="Annie Wu" />
+    <meta name="contributer" content="Steven M" />
+    <meta
+      name="description"
+      content="Twitter clone, but if Twitter was owned by Discord"
+    />
+
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap"
+      rel="stylesheet"
+    />
+    <link href="{% static 'css/main.css' %}" rel="stylesheet" type="text/css" />
+
+    <link
+      rel="stylesheet"
+      href="https://unicons.iconscout.com/release/v3.0.6/css/line.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    />
+    <script
+      src="https://code.jquery.com/jquery-3.7.0.js"
+      integrity="sha256-JlqSTELeR4TLqP0OG9dxM7yDPqX1ox/HfgiSLBj8+kM="
+      crossorigin="anonymous"
+    ></script>
+  </head>
+
+  <body>
+    <div class="page">
+      <div class="profile-top-container">
+        <div class="header-photo">
+          {% if user.banner %}
+          <img src="{{user.banner.url}}" alt="Header" />
+          {% else %}
+          <img src="{% static 'img/header.jpg' %}" alt="Header" />
+          {% endif %}
+        </div>
+        <div class="profile">
+          <div class="prof-pic-and-buttons-row">
+            <div class="prof-pic">
+              {% if user.avatar %}
+              <img src="{{user.avatar.url}}" alt="Profile Picture" />
+              {% else %}
+              <img
+                src="{% static 'img/discord-icon-with-status-bordered.svg' %}"
+                alt="Profile Picture"
+              />
+              {% endif %}
+            </div>
+            <div class="buttons">
+              {% if user.user.id == request.user.id %}
+              <div class="button twt">
+                <a
+                  href="javascript:clickFollow('buttonTweet')"
+                  class=""
+                  id="buttontwt"
+                >
+                  Tweet
+                </a>
+              </div>
+              {% endif %}
+              <form method="POST" enctype="multipart/form-data">
+                <div class="message-window" id="messageWindow">
+                  <div class="input-box">
+                    <div class="tweet-area">
+                      <!-- <span class="placeholder">What's happening?</span> -->
+                      <div>
+                        <textarea class="editable" name="tweet" id="">
+                        </textarea>
+                      </div>
+                    </div>
+                    <div class="privacy">
+                      <i class="fas fa-globe-asia"></i>
+                      <span>Everyone can reply</span>
+                    </div>
+                  </div>
+                  <div class="bottom">
+                    <ul class="icons">
+                      <label for="fileInput">
+                        <li>
+                          <i class="far fa-file-image"></i>
+                        </li>
+                      </label>
+                      <input
+                        type="file"
+                        id="fileInput"
+                        name="image"
+                        value="image"
+                        accept="image/*,video/*"
+                        onchange="handleFileUpload(event)"
+                      />
+                      <li><i class="fas fa-map-marker-alt"></i></li>
+                      <li><i class="far fa-grin"></i></li>
+                      <li><i class="far fa-user"></i></li>
+                    </ul>
+                    <div class="content">
+                      <span class="counter">100</span>
+
+                      {% csrf_token %}
+                      <input
+                        type="hidden"
+                        id="post_id_input"
+                        name="post_id"
+                        value=""
+                      />
+                      <input type="hidden" id="name" name="name" value="twt" />
+                      <button onclick="sendMessage()">Tweet</button>
+                    </div>
+                  </div>
+                </div>
+              </form>
+              {% if user.user.id != request.user.id %}
+              <div class="button follow">
+                <a
+                  href="javascript:clickFollow('buttonFollow')"
+                  class=""
+                  id="buttonFollow"
+                >
+                  Follow
+                </a>
+              </div>
+              <div class="button message">
+                <a href="{% url 'dm' user.user.id %}">Send Message</a>
+              </div>
+              {% endif %}
+              <div class="button more">
+                <img src="{% static 'img/more.svg' %}" alt="Three Dots" />
+              </div>
+              <div class="options-window">
+                <ul>
+                  <li><a href="{% url 'logout' %}">Logout</a></li>
+                  {% if user.user.id != request.user.id %}
+                  <li><a href="#">Report</a></li>
+                  <li><a href="#">Block</a></li>
+                  {% endif %}
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="username">
+            <span>{{user.user.username}}</span>
+            <img src="{% static 'img/verify.svg' %}" alt="Verified" />
+          </div>
+          <div class="hashtagNumber">#{{user.user.id}}</div>
+          <div class="badges">
+            <img
+              src="{% static 'img/discord-badges.svg' %}"
+              alt="Discord Badges"
+            />
+          </div>
+          <div class="bio">
+            <span>{{user.bio}}</span>
+          </div>
+          <div class="location-link-bday-joined">
+            <div class="location">
+              <img src="{% static 'img/location.svg' %}" alt="Location" />
+              <span>{{user.location}}</span>
+            </div>
+            <div class="link">
+              <img src="{% static 'img/link.svg' %}" alt="Link" />
+              <span
+                ><a href="https://{{user.links}}"
+                  >{{ user.links|slice:"4:" }}</a
+                ></span
+              >
+            </div>
+            <!-- <div class="bday">
+					<img src="{% static 'img/birthday.svg' %}" alt="Birthday" />
+					<span>May 13</span>
+				</div> -->
+            <div class="date-joined">
+              <img src="{% static 'img/calendar.svg' %}" alt="Date Joined" />
+              <span>Joined {{user.user.date_joined | date:"F d Y"}}</span>
+            </div>
+          </div>
+          <div class="following-follower">
+            <div>
+              <span class="follow-number">{{user.num_of_following}}</span>
+              <span class="follow-text">Following</span>
+            </div>
+            <div>
+              <span class="follow-number">{{user.num_of_followers}}</span>
+              <span class="follow-text">Followers</span>
+            </div>
+          </div>
+        </div>
+        <div class="profile-tweets-tabs">
+          <a
+            href="javascript:changeTab('tb1', 'Tweets');"
+            id="tb1"
+            class="tab-button active"
+            >Tweets</a
+          >
+          <a
+            href="javascript:changeTab('tb2', 'Replies');"
+            id="tb2"
+            class="tab-button"
+            >Tweets & Replies</a
+          >
+          <a
+            href="javascript:changeTab('tb3', 'Media');"
+            id="tb3"
+            class="tab-button"
+            >Media</a
+          >
+          <a
+            href="javascript:changeTab('tb4', 'Likes');"
+            id="tb4"
+            class="tab-button"
+            >Likes</a
+          >
+        </div>
+      </div>
+      <div id="Tweets" class="tab-content">
+        {% for pst in post %}
+        <div class="tweet">
+          <div class="tweet-profile-pic">
+            {% if pst.user_profile.avatar %}
+            <img src="{{pst.user_profile.avatar.url}}" alt="Profile Picture" />
+            {% else %}
+            <img
+              src="{% static 'img/discord-icon-pink.svg' %}"
+              alt="Profile Picture"
+            />
+            {% endif %}
+          </div>
+          <div class="tweet-content">
+            <div class="tweeter-info">
+              <span class="name">{{user.user.username}}</span>
+              <span class="hashtag">#{{user.user_id}}</span>
+              <span class="separator">•</span>
+              <span class="date-sent">{{pst.date_posted}}</span>
+            </div>
+            <div class="tweet-text">
+              <p>{{pst.post}}</p>
+            </div>
+            {% if pst.image %}
+            <div class="tweet-pic">
+              <img src="{{pst.image.url}}" alt="Picture in the Tweet" />
+            </div>
+            {% endif %} {% if pst.replied_to_post %}
+            <div class="quote-tweet">
+              <div class="quote-tweet-content">
+                <div class="quote-prof-pic-tweeter-info">
+                  {% if pst.replied_to_post.user_profile.avatar %}
+                  <img
+                    src="{{pst.replied_to_post.user_profile.avatar.url}}"
+                    alt="Profile Picture"
+                  />
+                  {% else %}
+                  <img
+                    src="{% static 'img/discord-icon-pink.svg' %}"
+                    alt="Profile Picture"
+                  />
+                  {% endif %}
+                  <span class="name"
+                    >{{pst.replied_to_post.user.username}}</span
+                  >
+                  <span class="hashtag">#{{pst.replied_to_post.user.id}}</span>
+                  <span class="separator">•</span>
+                  <span class="date-sent"
+                    >{{pst.replied_to_post.date_posted}}</span
+                  >
+                </div>
+                <div class="tweet-text">
+                  <p>{{pst.replied_to_post.post}}</p>
+                </div>
+              </div>
+            </div>
+            {% endif %}
+            <div class="tweet-react">
+              <a
+                href="javascript:clickReaction('reactReply{{pst.id}}')"
+                class="reaction reply"
+                id="reactReply{{pst.id}}"
+                data-value="{{pst.id}}"
+              >
+                <img src="{% static 'img/reply.svg' %}" alt="Reply" />
+                <span class="react-amount">Reply</span>
+              </a>
+
+              <!-- <a
+						href="javascript:clickReaction('reactRetweet{{pst.id}}')"
+						class="reaction"
+						id="reactRetweet{{pst.id}}"
+					>
+						<img src="{% static 'img/retweet.svg' %}" alt="Retweet" />
+						<span class="react-amount">{{pst.retweets}}</span>
+					</a> -->
+              <form method="POST">
+                {% csrf_token %}
+                <a
+                  href="javascript:clickReaction('reactLike{{pst.id}}')"
+                  class="reaction like"
+                  id="reactLike{{pst.id}}"
+                >
+                  <input type="hidden" name="like" value="{{pst.id}}" />
+                  <img src="{% static 'img/like.svg' %}" alt="Like" />
+                  <button>
+                    <span class="react-amount">Like</span>
+                  </button>
+                </a>
+              </form>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      <div id="Replies" class="tab-content" style="display: none">
+        {% for pst in post %} {% if pst.replied_to_post %}
+        <div class="tweet reply">
+          <div class="tweet-profile-pic">
+            <div class="profile-pic">
+              {% if pst.user_profile.avatar %}
+              <img
+                src="{{pst.user_profile.avatar.url}}"
+                alt="Profile Picture"
+              />
+              {% else %}
+              <img
+                src="{% static 'img/discord-icon-blue.svg' %}"
+                alt="Profile Picture"
+              />
+              {% endif %}
+            </div>
+            <div class="replying-icon-line"></div>
+          </div>
+          <div class="tweet-content">
+            <div class="tweeter-info">
+              <span class="name">{{pst.user.username}}</span>
+              <span class="hashtag">#{{pst.user.id}}</span>
+              <span class="separator">•</span>
+              <span class="date-sent">{{pst.date_posted}}</span>
+            </div>
+            <div class="replying-to">
+              <a href="{% url 'home' pst.replied_to_post.user.id %}"
+                >{{pst.replied_to_post.user.username}}
+                #{{pst.replied_to_post.user.id}}</a
+              >
+            </div>
+            <div class="tweet-text">
+              <p>{{pst.post}}</p>
+            </div>
+            {% if pst.image %}
+            <div class="tweet-pic">
+              <img src="{{pst.image.url}}" alt="Gif in the Tweet" />
+            </div>
+            {% endif %}
+            <!-- <div class="tweet-react">
+					<a
+						href="javascript:clickReaction('reactReply11')"
+						class="reaction"
+						id="reactReply11"
+					>
+						<img src="./img/reply.svg" alt="Reply" />
+						<span class="react-amount">2</span>
+					</a>
+					<a
+						href="javascript:clickReaction('reactRetweet11')"
+						class="reaction"
+						id="reactRetweet11"
+					>
+						<img src="./img/retweet.svg" alt="Retweet" />
+						<span class="react-amount"></span>
+					</a>
+					<a
+						href="javascript:clickReaction('reactLike11')"
+						class="reaction"
+						id="reactLike11"
+					>
+						<img src="./img/like.svg" alt="Like" />
+						<span class="react-amount">212</span>
+					</a>
+				</div> -->
+          </div>
+        </div>
+        <div class="tweet">
+          <div class="tweet-profile-pic">
+            <div class="profile-pic">
+              {% if pst.replied_to_post.user_profile.avatar %}
+              <img
+                src="{{pst.replied_to_post.user_profile.avatar.url}}"
+                alt="Profile Picture"
+              />
+              {% else %}
+              <img
+                src="{% static 'img/discord-icon-pink.svg' %}"
+                alt="Profile Picture"
+              />
+              {% endif %}
+            </div>
+          </div>
+          <div class="tweet-content">
+            <div class="tweeter-info">
+              <span class="name">{{pst.replied_to_post.user.username}}</span>
+              <span class="hashtag">#{{pst.replied_to_post.user.id}}</span>
+              <span class="separator">•</span>
+              <span class="date-sent">{{pst.replied_to_post.date_posted}}</span>
+            </div>
+            <div class="tweet-text">
+              <p>{{pst.replied_to_post.post}}</p>
+            </div>
+            {% if pst.replied_to_post.image %}
+            <div class="tweet-pic">
+              <img
+                src="{{pst.replied_to_post.image.url}}"
+                alt="Gif in the Tweet"
+              />
+            </div>
+            {% endif %}
+            <!-- <div class="tweet-react">
+					<a
+						href="javascript:clickReaction('reactReply12')"
+						class="reaction"
+						id="reactReply12"
+					>
+						<img src="./img/reply.svg" alt="Reply" />
+						<span class="react-amount">3</span>
+					</a>
+					<a
+						href="javascript:clickReaction('reactRetweet12')"
+						class="reaction"
+						id="reactRetweet12"
+					>
+						<img src="./img/retweet.svg" alt="Retweet" />
+						<span class="react-amount"></span>
+					</a>
+					<a
+						href="javascript:clickReaction('reactLike12')"
+						class="reaction"
+						id="reactLike12"
+					>
+						<img src="./img/like.svg" alt="Like" />
+						<span class="react-amount">368</span>
+					</a>
+				</div> -->
+          </div>
+        </div>
+        {% endif %} {% endfor %}
+      </div>
+      <div id="Media" class="tab-content" style="display: none">
+        {% for pst in post %} {% if pst.image %}
+        <div class="tweet">
+          <div class="tweet-profile-pic">
+            <img src="{{user.avatar.url}}" alt="Profile Picture" />
+          </div>
+          <div class="tweet-content">
+            <div class="tweeter-info">
+              <span class="name">{{user.user.username}}</span>
+              <span class="hashtag">#{{user.user_id}}</span>
+              <span class="separator">•</span>
+              <span class="date-sent">{{pst.date_posted}}</span>
+            </div>
+            <div class="tweet-text">
+              <p>{{pst.post}}</p>
+            </div>
+            <div class="tweet-pic">
+              <img src="{{pst.image.url}}" alt="Picture in the Tweet" />
+            </div>
+            {% if pst.quote %}
+            <div class="quote-tweet">
+              <div class="quote-tweet-content">
+                <div class="quote-prof-pic-tweeter-info">
+                  <img src="{{user.avatar.url}}" alt="Profile Picture" />
+                  <span class="name">Dariath</span>
+                  <span class="hashtag">#4200</span>
+                  <span class="separator">•</span>
+                  <span class="date-sent">May 29, 2015</span>
+                </div>
+                <div class="tweet-text">
+                  <p>
+                    Anyone heard of this Discord - Chat for Games program? Looks
+                    interesting.
+                  </p>
+                </div>
+                <div class="show-thread">
+                  <a href="#">Show this thread</a>
+                </div>
+              </div>
+            </div>
+            {% endif %}
+            <div class="tweet-react">
+              <a
+                href="javascript:clickReaction('reactReply{{pst.id}}')"
+                class="reaction"
+                id="reactReply{{pst.id}}"
+              >
+                <img src="{% static 'img/reply.svg' %}" alt="Reply" />
+                <span class="react-amount">{{pst.replies}}</span>
+              </a>
+              <!-- <a
+						href="javascript:clickReaction('reactRetweet{{pst.id}}')"
+						class="reaction"
+						id="reactRetweet{{pst.id}}"
+					>
+						<img src="{% static 'img/retweet.svg' %}" alt="Retweet" />
+						<span class="react-amount">{{pst.retweets}}</span>
+					</a> -->
+              <form method="POST">
+                {% csrf_token %}
+                <a
+                  href="javascript:clickReaction('reactLike{{pst.id}}')"
+                  class="reaction like"
+                  id="reactLike{{pst.id}}"
+                >
+                  <input type="hidden" name="like" value="{{pst.id}}" />
+                  <img src="{% static 'img/like.svg' %}" alt="Like" />
+                  <button>
+                    <span class="react-amount">Like</span>
+                  </button>
+                </a>
+              </form>
+            </div>
+          </div>
+        </div>
+        {% endif %} {% endfor %}
+      </div>
+      <div id="Likes" class="tab-content" style="display: none">
+        {% for pst in liked_post %}
+        <div class="tweet">
+          <div class="tweet-profile-pic">
+            {% if pst.post.user_profile.avatar %}
+            <img
+              src="{{pst.post.user_profile.avatar.url}}"
+              alt="Profile Picture"
+            />
+            {% else %}
+            <img
+              src="{% static 'img/discord-icon-pink.svg' %}"
+              alt="Profile Picture"
+            />
+            {% endif %}
+          </div>
+          <div class="tweet-content">
+            <div class="tweeter-info">
+              <span class="name">{{pst.post.user.username}}</span>
+              <span class="hashtag">#{{pst.post.user.user_id}}</span>
+              <span class="separator">•</span>
+              <span class="date-sent">{{pst.post.date_posted}}</span>
+            </div>
+            <div class="tweet-text">
+              <p>{{pst.post.post}}</p>
+            </div>
+            {% if pst.image %}
+            <div class="tweet-pic">
+              <img src="{{pst.image.url}}" alt="Picture in the Tweet" />
+            </div>
+            {% endif %} {% if pst.post.replied_to_post %}
+            <div class="quote-tweet">
+              <div class="quote-tweet-content">
+                <div class="quote-prof-pic-tweeter-info">
+                  {% if pst.post.replied_to_post.user_profile.avatar %}
+                  <img
+                    src="{{pst.post.replied_to_post.user_profile.avatar.url}}"
+                    alt="Profile Picture"
+                  />
+                  {% else %}
+                  <img
+                    src="{% static 'img/discord-icon-pink.svg' %}"
+                    alt="Profile Picture"
+                  />
+                  {% endif %}
+                  <span class="name"
+                    >{{pst.post.replied_to_post.user.username}}</span
+                  >
+                  <span class="hashtag">#{{pst.replied_to_post.user.id}}</span>
+                  <span class="separator">•</span>
+                  <span class="date-sent"
+                    >{{pst.post.replied_to_post.date_posted}}</span
+                  >
+                </div>
+                <div class="tweet-text">
+                  <p>{{pst.post.replied_to_post.post}}</p>
+                </div>
+              </div>
+            </div>
+            {% endif %}
+            <div class="tweet-react">
+              <a
+                href="javascript:clickReaction('reactReply{{pst.post.id}}')"
+                class="reaction reply"
+                id="reactReply{{pst.post.id}}"
+                data-value="{{pst.post.id}}"
+              >
+                <img src="{% static 'img/reply.svg' %}" alt="Reply" />
+                <span class="react-amount">Reply</span>
+              </a>
+
+              <!-- <a
+						href="javascript:clickReaction('reactRetweet{{pst.id}}')"
+						class="reaction"
+						id="reactRetweet{{pst.id}}"
+					>
+						<img src="{% static 'img/retweet.svg' %}" alt="Retweet" />
+						<span class="react-amount">{{pst.retweets}}</span>
+					</a> -->
+              <form method="POST">
+                {% csrf_token %}
+                <a
+                  href="javascript:clickReaction('reactLike{{pst.post.id}}')"
+                  class="reaction like"
+                  id="reactLike{{pst.post.id}}"
+                >
+                  <input type="hidden" name="like" value="{{pst.post.id}}" />
+                  <img src="{% static 'img/like.svg' %}" alt="Like" />
+                  <button>
+                    <span class="react-amount">Like</span>
+                  </button>
+                </a>
+              </form>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      <footer class="nav-bar-bottom">
+        <a href="{% url 'profile' request.user.id %}">
+          <img src="{% static '/img/discord-logo.svg' %}" alt="Server" />
+        </a>
+        <a href="{% url 'friends' %}">
+          <img src="{% static '/img/discord-friends.svg' %}" alt="Friends" />
+        </a>
+        <a href="{% url 'search' %}">
+          <img src="{% static '/img/discord-search.svg' %}" alt="Search" />
+        </a>
+        <a href="{% url 'mentions' request.user.id %}">
+          <img src="{% static '/img/discord-mentions.svg' %}" alt="Mentions" />
+        </a>
+        <a href="{% url 'home' request.user.id %}">
+          {% if current_user.avatar %}
+          <img src="{{current_user.avatar.url}}" alt="Profile Picture" />
+          {% else %}
+          <img
+            src="{% static '/img/discord-icon-with-status.svg' %}"
+            alt="Profile Picture"
+          />
+          {% endif %}
+        </a>
+      </footer>
+    </div>
+
+    <script src="{% static 'js/main.js' %}"></script>
+  </body>
+</html>

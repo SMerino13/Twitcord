@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+  <head>
+    <title>Mentions</title>
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="author" content="Annie Wu" />
+    <meta name="contributer" content="Steven Merino" />
+
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="{% static 'css/mentions.css' %}"
+      rel="stylesheet"
+      type="text/css"
+    />
+  </head>
+  <body>
+    <div class="page">
+      <div id="Tweets" class="tab-content">
+        {% for pst in post %}
+        <div class="tweet">
+          <div class="tweet-profile-pic">
+            <!-- <img src="{{user.avatar.url}}" alt="Profile Picture" /> -->
+            {% if pst.user_profile.avatar %}
+            <img src="{{pst.user_profile.avatar.url}}" alt="Profile Picture" />
+            {% else %}
+            <img
+              src="{% static '/img/discord-icon.svg' %}"
+              alt="Profile Picture"
+            />
+            {% endif %}
+          </div>
+          <div class="tweet-content">
+            <div class="tweeter-info">
+              <span class="name">{{pst.user.username}}</span>
+              <span class="hashtag">#{{pst.user.id}}</span>
+              <span class="separator">•</span>
+              <span class="date-sent">{{pst.date_posted}}</span>
+            </div>
+            <div class="tweet-text">
+              <p>{{pst.post}}</p>
+            </div>
+            {% if pst.image %}
+            <div class="tweet-pic">
+              <img src="{{pst.image.url}}" alt="Picture in the Tweet" />
+            </div>
+            {% endif %} {% if pst.quote %}
+            <div class="quote-tweet">
+              <div class="quote-tweet-content">
+                <div class="quote-prof-pic-tweeter-info">
+                  <img src="{{user.avatar.url}}" alt="Profile Picture" />
+                  <span class="name">Dariath</span>
+                  <span class="hashtag">#4200</span>
+                  <span class="separator">•</span>
+                  <span class="date-sent">May 29, 2015</span>
+                </div>
+                <div class="tweet-text">
+                  <p>
+                    Anyone heard of this Discord - Chat for Games program? Looks
+                    interesting.
+                  </p>
+                </div>
+                <div class="show-thread">
+                  <a href="#">Show this thread</a>
+                </div>
+              </div>
+            </div>
+            {% endif %}
+            <div class="tweet-react">
+              <a
+                href="javascript:clickReaction('reactReply{{pst.id}}')"
+                class="reaction"
+                id="reactReply{{pst.id}}"
+              >
+                <img src="{% static 'img/reply.svg' %}" alt="Reply" />
+                <span class="react-amount">{{pst.replies}}</span>
+              </a>
+              <a
+                href="javascript:clickReaction('reactRetweet{{pst.id}}')"
+                class="reaction"
+                id="reactRetweet{{pst.id}}"
+              >
+                <img src="{% static 'img/retweet.svg' %}" alt="Retweet" />
+                <span class="react-amount">{{pst.retweets}}</span>
+              </a>
+              <a
+                href="javascript:clickReaction('reactLike{{pst.id}}')"
+                class="reaction"
+                id="reactLike{{pst.id}}"
+              >
+                <img src="{% static 'img/like.svg' %}" alt="Like" />
+                <span class="react-amount">{{pst.likes}}</span>
+              </a>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      <footer class="nav-bar-bottom">
+        <a href="{% url 'profile' request.user.id %}">
+          <img src="{% static '/img/discord-logo.svg' %}" alt="Server" />
+        </a>
+        <a href="{% url 'friends' %}">
+          <img src="{% static '/img/discord-friends.svg' %}" alt="Friends" />
+        </a>
+        <a href="{% url 'search' %}">
+          <img src="{% static '/img/discord-search.svg' %}" alt="Search" />
+        </a>
+        <a href="{% url 'mentions' request.user.id %}">
+          <img src="{% static '/img/discord-mentions.svg' %}" alt="Mentions" />
+        </a>
+        <a href="{% url 'home' request.user.id %}">
+          {% if current_user.avatar %}
+          <img src="{{current_user.avatar.url}}" alt="Profile Picture" />
+          {% else %}
+          <img
+            src="{% static '/img/discord-icon-with-status.svg' %}"
+            alt="Profile Picture"
+          />
+          {% endif %}
+        </a>
+      </footer>
+    </div>
+
+    <script src="./js/mentions.js"></script>
+  </body>
+</html>

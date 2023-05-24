@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+  <head>
+    <title>Twitcord</title>
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="author" content="Annie Wu" />
+    <meta name="contributer" content="Steven Merino" />
+    <meta
+      name="description"
+      content="Twitter clone, but if Twitter was owned by Discord"
+    />
+
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="{% static 'css/search.css' %}"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <link
+      href="https://unpkg.com/css.gg@2.0.0/icons/css/add.css"
+      rel="stylesheet"
+    />
+    <script
+      src="https://kit.fontawesome.com/df80e4625e.js"
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body>
+    <div class="page">
+      <div class="header-info">
+        <i class="fa-solid fa-user"></i>
+        <span class="friend">Explore</span>
+        <button>
+          <a
+            href="javascript:changeTab('tb1', 'People');"
+            id="tb1"
+            class="tab-button active"
+            >People
+          </a>
+        </button>
+        <button>
+          <a
+            href="javascript:changeTab('tb2', 'Servers');"
+            id="tb2"
+            class="tab-button"
+            >Servers
+          </a>
+        </button>
+        <!-- <button class="add">Add Friend</button> -->
+      </div>
+
+      <div class="search-container">
+        <!-- <input
+						type="text"
+						class="search"
+						id="search-input"
+						placeholder="Search..."
+					/>
+					<i class="fa-solid fa-magnifying-glass"></i> -->
+        {% for message in messages %}
+        <h4>{{message}}</h4>
+        {% endfor %}
+      </div>
+
+      <div id="People" class="list-content">
+        {% for up in user_profiles %} {% if up.user_id != request.user.id %}
+        <div class="person">
+          <div class="prof-pic">
+            {% if up.avatar %}
+            <img src="{{up.avatar.url}}" alt="Header" />
+            {% else %}
+            <img src="{% static 'img/discord-icon.svg' %}" alt="Header" />
+            {% endif %}
+          </div>
+          <div class="user-info">
+            <span class="username">{{up.user.username}} #{{up.user_id}}</span>
+            <br />
+            <span>Joined {{up.user.date_joined | date:"F d Y"}}</span>
+          </div>
+          <div class="btns">
+            <button><a href="{% url 'dm' up.user.id %}">Message</a></button>
+            <button><a href="{% url 'home' up.user.id %}">Profile</a></button>
+            <form action="" method="post">
+              {% csrf_token %}
+              <input type="hidden" name="user1" value="{{request.user.id}}" />
+              <input type="hidden" name="user2" value="{{up.user.id}}" />
+              <button>Add</button>
+            </form>
+          </div>
+        </div>
+        {% endif %} {% endfor %}
+      </div>
+      <div id="Servers" class="list-content" style="display: none">
+        <div class="server">
+          <div class="server-pic">
+            <!-- <img
+								src="./img/discord-icon-with-status-bordered.svg"
+								alt="Profile Picture"
+							/> -->
+          </div>
+          <div class="server-info">
+            <!-- <span class="name">Underachievers</span> <br />
+							<span>Created 02/24/2021</span> <br />
+							<span>22 Members</span> -->
+            <span
+              >This feature is currently under developement. Please feel free
+              the explore the rest of the site and connect with others until
+              this is completed.</span
+            >
+          </div>
+          <!-- <div class="btns">
+							<button><a href="message.html">Join</a></button>
+						</div> -->
+        </div>
+      </div>
+
+      <footer class="nav-bar-bottom">
+        <a href="{% url 'profile' request.user.id %}">
+          <img src="{% static '/img/discord-logo.svg' %}" alt="Server" />
+        </a>
+        <a href="{% url 'friends' %}">
+          <img src="{% static '/img/discord-friends.svg' %}" alt="Friends" />
+        </a>
+        <a href="{% url 'search' %}">
+          <img src="{% static '/img/discord-search.svg' %}" alt="Search" />
+        </a>
+        <a href="{% url 'mentions' request.user.id %}">
+          <img src="{% static '/img/discord-mentions.svg' %}" alt="Mentions" />
+        </a>
+        <a href="{% url 'home' request.user.id %}">
+          {% if current_user.avatar %}
+          <img src="{{current_user.avatar.url}}" alt="Profile Picture" />
+          {% else %}
+          <img
+            src="{% static '/img/discord-icon-with-status.svg' %}"
+            alt="Profile Picture"
+          />
+          {% endif %}
+        </a>
+      </footer>
+    </div>
+    <script src="{% static 'js/search.js' %}"></script>
+  </body>
+</html>
